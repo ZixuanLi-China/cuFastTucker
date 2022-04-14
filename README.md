@@ -1,1 +1,4 @@
 # FastTucker
+
+
+sh run
