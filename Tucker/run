@@ -1,4 +1,0 @@
-#!/bin/bash
-nvcc -o main main.cu tools.cpp kernel.cu -lcublas
-./main ../Data/movielens_tensor.train ../Data/movielens_tensor.test 3 4 50 0.001 0.05 0.01 0.001 0.05 0.01 0
-
