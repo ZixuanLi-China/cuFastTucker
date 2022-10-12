@@ -1,4 +1,4 @@
-# FastTucker
+# cuFastTucker
 
 
 sh run
