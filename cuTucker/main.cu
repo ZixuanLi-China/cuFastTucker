@@ -1,14 +1,8 @@
 #include <stdio.h>
-#include <math.h>
-#include <stdlib.h>
-#include <time.h>
-#include <string.h>
 #include "tools.h"
 #include "kernel.h"
 
-#define type_of_data float
-
-using namespace std;
+//using namespace std;
 
 type_of_data learn_alpha_a;
 type_of_data learn_beta_a;
@@ -19,8 +13,6 @@ type_of_data learn_beta_g;
 type_of_data lambda_g;
 
 int iter_number;
-
-int model;
 
 type_of_data learn_rate_a;
 type_of_data learn_rate_g;
@@ -82,10 +74,11 @@ double stop_time;
 
 int main(int argc, char *argv[]) {
 
-	if (argc == 13) {
+	if (argc == 12) {
 
 		InputPath_train = argv[1];
 		InputPath_test = argv[2];
+
 		order = atoi(argv[3]);
 		core_dimen = atoi(argv[4]);
 
@@ -99,15 +92,16 @@ int main(int argc, char *argv[]) {
 		learn_beta_g = atof(argv[10]);
 		lambda_g = atof(argv[11]);
 
-		model = atoi(argv[12]);
-
 		core_length = 1;
 		for (int i = 0; i < order; i++) {
 			core_length *= core_dimen;
 		}
 
 	}
-	cudaSetDevice(0);
+	printf("learn_alpha_a:%f\tlearn_beta_a:%f\tlambda_a:%f\n", learn_alpha_a,
+			learn_beta_a, lambda_a);
+	printf("learn_alpha_g:%f\tlearn_beta_g:%f\tlambda_g:%f\n", learn_alpha_g,
+			learn_beta_g, lambda_g);
 	Getting_Input(InputPath_train, InputPath_test, order, &dimen, &nnz_train,
 			&nnz_test, &index_train_host, &value_train_host, &index_test_host,
 			&value_test_host, &data_norm);
@@ -161,7 +155,7 @@ int main(int argc, char *argv[]) {
 		Update_Parameter_G_Batch(order, core_length, core_dimen,
 				parameter_a_device, parameter_g_device, nnz_train,
 				value_train_host_to_device, index_train_host_to_device,
-				learn_rate_g, lambda_g, model);
+				learn_rate_g, lambda_g);
 
 		stop_time = Seconds();
 		time_spend += stop_time - start_time;
@@ -173,6 +167,7 @@ int main(int argc, char *argv[]) {
 		GET_RMSE_AND_MAE(order, core_length, core_dimen, parameter_a_device,
 				parameter_g_device, nnz_test, value_test_device,
 				index_test_device, g_device, &test_rmse, &test_mae);
+
 		Select_Best_Result(&train_rmse, &train_mae, &test_rmse, &test_mae,
 				&best_train_rmse, &best_train_mae, &best_test_rmse,
 				&best_test_mae);
@@ -181,7 +176,9 @@ int main(int argc, char *argv[]) {
 				stop_time - mid_time, stop_time - start_time, time_spend);
 
 	}
+
 	printf("best:\ttrain rmse:%f\ttest rmse:%f\ttrain mae:%f\ttest mae:%f\t\n",
 			best_train_rmse, best_test_rmse, best_train_mae, best_test_mae);
+
 	return 0;
 }

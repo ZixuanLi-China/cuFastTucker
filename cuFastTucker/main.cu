@@ -1,18 +1,10 @@
 #include <stdio.h>
-#include <math.h>
-#include <stdlib.h>
-#include <time.h>
-#include <string.h>
 #include "tools.h"
 #include "kernel.h"
-
-#define type_of_data float
 
 using namespace std;
 
 int iter_number;
-
-int model;
 
 type_of_data learn_alpha_a;
 type_of_data learn_beta_a;
@@ -78,10 +70,11 @@ double stop_time;
 
 int main(int argc, char *argv[]) {
 
-	if (argc == 14) {
+	if (argc == 13) {
 
 		InputPath_train = argv[1];
 		InputPath_test = argv[2];
+
 		core_kernel = atoi(argv[3]);
 		order = atoi(argv[4]);
 		core_dimen = atoi(argv[5]);
@@ -96,15 +89,18 @@ int main(int argc, char *argv[]) {
 		learn_beta_b = atof(argv[11]);
 		lambda_b = atof(argv[12]);
 
-		model = atoi(argv[13]);
-
 		core_length = 1;
 		for (int i = 0; i < order; i++) {
 			core_length *= core_dimen;
 		}
 
 	}
-	cudaSetDevice(0);
+
+	printf("learn_alpha_a:%f\tlearn_beta_a:%f\tlambda_a:%f\n", learn_alpha_a,
+			learn_beta_a, lambda_a);
+	printf("learn_alpha_b:%f\tlearn_beta_b:%f\tlambda_b:%f\n", learn_alpha_b,
+			learn_beta_b, lambda_b);
+
 	Getting_Input(InputPath_train, InputPath_test, order, &dimen, &nnz_train,
 			&nnz_test, &index_train_host, &value_train_host, &index_test_host,
 			&value_test_host, &data_norm);
@@ -136,6 +132,7 @@ int main(int argc, char *argv[]) {
 	GET_RMSE_AND_MAE(order, core_kernel, core_dimen, parameter_a_device,
 			parameter_b_device, nnz_test, value_test_device, index_test_device,
 			&best_test_rmse, &best_test_mae);
+
 	printf(
 			"initial:\ttrain rmse:%f\ttest rmse:%f\ttrain mae:%f\ttest mae:%f\t\n",
 			best_train_rmse, best_test_rmse, best_train_mae, best_test_mae);
@@ -151,14 +148,14 @@ int main(int argc, char *argv[]) {
 
 		Update_Parameter_A(order, core_kernel, core_dimen, parameter_a_device,
 				parameter_b_device, nnz_train, value_train_host_to_device,
-				index_train_host_to_device, learn_rate_a, lambda_a, model);
+				index_train_host_to_device, learn_rate_a, lambda_a);
 
 		mid_time = Seconds();
 
 		Update_Parameter_B_Batch(order, core_kernel, core_dimen,
 				parameter_a_device, parameter_b_device, nnz_train,
 				value_train_host_to_device, index_train_host_to_device,
-				learn_rate_b, lambda_b, model);
+				learn_rate_b, lambda_b);
 
 		stop_time = Seconds();
 		time_spend += stop_time - start_time;
@@ -166,9 +163,11 @@ int main(int argc, char *argv[]) {
 		GET_RMSE_AND_MAE(order, core_kernel, core_dimen, parameter_a_device,
 				parameter_b_device, nnz_train, value_train_host_to_device,
 				index_train_host_to_device, &train_rmse, &train_mae);
+
 		GET_RMSE_AND_MAE(order, core_kernel, core_dimen, parameter_a_device,
 				parameter_b_device, nnz_test, value_test_device,
 				index_test_device, &test_rmse, &test_mae);
+
 		Select_Best_Result(&train_rmse, &train_mae, &test_rmse, &test_mae,
 				&best_train_rmse, &best_train_mae, &best_test_rmse,
 				&best_test_mae);

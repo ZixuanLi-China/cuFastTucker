@@ -1,14 +1,5 @@
-#include <numeric>
-#include <iomanip>
-#include <fstream>
-#include <string>
-#include <cuda_runtime.h>
-#include <curand_kernel.h>
 #include <sys/time.h>
-
-#define type_of_data float
-
-using namespace std;
+#include "parameter.h"
 
 inline double Seconds() {
 	struct timeval tp;
@@ -40,6 +31,7 @@ void Cuda_Parameter_Initialization(int order, int core_kernel, int core_dimen,
 		type_of_data ***parameter_b_host_to_device);
 
 void Select_Best_Result(type_of_data *train_rmse, type_of_data *train_mae,
-type_of_data *test_rmse, type_of_data *test_mae,
-type_of_data *best_train_rmse, type_of_data *best_train_mae,
-type_of_data *best_test_rmse, type_of_data *best_test_mae);
+		type_of_data *test_rmse, type_of_data *test_mae,
+		type_of_data *best_train_rmse, type_of_data *best_train_mae,
+		type_of_data *best_test_rmse, type_of_data *best_test_mae);
+
